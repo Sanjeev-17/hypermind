@@ -1,0 +1,100 @@
+# Tools currently representable in HyperMind (availability = registered capability)
+
+tools:
+  - id: filesystem.read
+    category: filesystem
+    read_only: true
+    side_effect: false
+    risk_level: low
+    available: true
+
+  - id: filesystem.write
+    category: filesystem
+    read_only: false
+    side_effect: true
+    risk_level: medium
+    available: true
+
+  - id: filesystem.delete
+    category: filesystem
+    read_only: false
+    side_effect: true
+    risk_level: high
+    available: true
+
+  - id: git.status
+    category: git
+    read_only: true
+    side_effect: false
+    risk_level: low
+    available: true
+
+  - id: git.diff
+    category: git
+    read_only: true
+    side_effect: false
+    risk_level: low
+    available: true
+
+  - id: git.commit
+    category: git
+    read_only: false
+    side_effect: true
+    risk_level: high
+    available: true
+
+  - id: shell.read_only
+    category: shell
+    read_only: true
+    side_effect: false
+    risk_level: low
+    available: true
+
+  - id: web.search
+    category: web
+    read_only: true
+    side_effect: false
+    risk_level: low
+    available: false  # not wired yet
+
+  - id: memory.read
+    category: memory
+    read_only: true
+    side_effect: false
+    risk_level: low
+    available: true
+
+  - id: memory.write
+    category: memory
+    read_only: false
+    side_effect: true
+    risk_level: medium
+    available: true
+
+  - id: obsidian.read
+    category: obsidian
+    read_only: true
+    side_effect: false
+    risk_level: low
+    available: true
+
+  - id: obsidian.write
+    category: obsidian
+    read_only: false
+    side_effect: true
+    risk_level: medium
+    available: true
+
+  - id: email.send
+    category: email
+    read_only: false
+    side_effect: true
+    risk_level: critical
+    available: false
+
+  - id: publish
+    category: publish
+    read_only: false
+    side_effect: true
+    risk_level: critical
+    available: false

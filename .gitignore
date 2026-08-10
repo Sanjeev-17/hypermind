@@ -15,6 +15,14 @@ credentials.json
 node_modules/
 dist/
 .cache/
+.venv/
+venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+
+# HyperMind local runtime
+.hypermind/
 
 # Local scratch / extracts
 work-cms-extract.json

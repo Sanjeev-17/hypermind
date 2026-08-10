@@ -1,0 +1,68 @@
+# Lightweight project index — aliases + priority docs (no embeddings).
+# Evidence: README case slate, PORTFOLIO_BLUEPRINT, docs/, portfolio-os/.
+
+projects:
+  hypermind:
+    aliases:
+      - hypermind
+      - mission control
+      - intelligence routing
+      - context engine
+      - ollama
+    roots:
+      - docs/
+      - hypermind/
+    priority_docs:
+      - docs/intelligence-routing.md
+      - docs/context-engine.md
+      - README.md
+      - hypermind/config/models.yaml
+
+  portfolio:
+    aliases:
+      - portfolio
+      - portfolio os
+      - portfolio-os
+      - case study
+      - case slate
+      - hiring
+      - senior product designer
+      - p-001
+      - p-005
+      - p-006
+      - taco bell
+      - tacobell
+      - check-in
+      - check in
+      - design system
+      - cruise
+    roots:
+      - portfolio-os/
+      - portfolio/
+    priority_docs:
+      - portfolio/Product_Brief.md
+      - portfolio-os/strategy/PORTFOLIO_BLUEPRINT.md
+      - portfolio-os/strategy/EXPERIENCE_BLUEPRINT.md
+      - portfolio-os/strategy/PORTFOLIO_NARRATIVE.md
+      - portfolio-os/strategy/PROJECT_INVENTORY.md
+      - portfolio-os/strategy/Personas.md
+      - portfolio-os/governance/Decision_Log.md
+      - portfolio-os/memory-index.md
+      - portfolio-os/Portfolio_OS_v1.0.md
+    project_ids:
+      P-006:
+        aliases: [p-006, "design system", multi-brand, cruise brands]
+        hint_docs:
+          - portfolio-os/strategy/PORTFOLIO_BLUEPRINT.md
+          - portfolio-os/strategy/PROJECT_INVENTORY.md
+          - portfolio-os/strategy/EXPERIENCE_BLUEPRINT.md
+      P-005:
+        aliases: [p-005, "check-in", "check in", "online check-in"]
+        hint_docs:
+          - portfolio-os/strategy/PORTFOLIO_BLUEPRINT.md
+          - portfolio-os/strategy/PROJECT_INVENTORY.md
+      P-001:
+        aliases: [p-001, "taco bell", tacobell, delivery]
+        hint_docs:
+          - portfolio-os/strategy/PORTFOLIO_BLUEPRINT.md
+          - portfolio-os/strategy/PROJECT_INVENTORY.md

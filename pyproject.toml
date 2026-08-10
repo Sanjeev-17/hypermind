@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hypermind"
+version = "0.1.0"
+description = "HyperMind intelligence routing foundation — provider-neutral orchestration"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+hypermind = "hypermind.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hypermind*"]
+
+[tool.setuptools.package-data]
+hypermind = [
+  "agents/*.yaml",
+  "tools/*.yaml",
+  "config/*.yaml",
+  "config/*.md",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

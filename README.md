@@ -38,16 +38,28 @@ See `portfolio-os/strategy/PORTFOLIO_BLUEPRINT.md`.
 ## Repo map
 
 ```
+hypermind/             Python intelligence routing foundation (provider-neutral)
+docs/                  Runtime architecture docs (e.g. intelligence-routing.md)
 portfolio-os/          Portfolio OS (playbook, governance, strategy, release, knowledge pointers)
   strategy/            Narrative, blueprint, experience blueprint, discovery/evaluation
   governance/          Decision log, hiring scorecard, assumptions
   release/             Release Gate L0–L3
 .cursor/skills/        Specialist agent skills (producer, architect, HM simulator, …)
 .cursor/rules/         Always-on Portfolio OS rules
+skills/                Shared HyperMind skills (e.g. taste) — not Cursor runtime
 portfolio/             Product Brief
 prompts/               Prompt library architecture + templates
 obsidian/              Stub → live vault is external Hypermind Obsidian vault
 ```
+
+### Intelligence routing (runtime)
+
+```bash
+pip install -e ".[dev]"
+python hypermind.py route "Review the authentication module"
+```
+
+See `docs/intelligence-routing.md`. Cursor is the IDE only — routing does not depend on Cursor APIs.
 
 ### Strategy stack (read in order)
 

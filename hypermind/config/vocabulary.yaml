@@ -1,0 +1,35 @@
+# Compact domain vocabulary for intent/project co-resolution (no embeddings).
+
+design_terms:
+  - case study
+  - portfolio
+  - ux
+  - ui
+  - user flow
+  - wireframe
+  - prototype
+  - interaction
+  - usability
+  - design rationale
+  - journey
+  - design system
+  - visual design
+  - interface
+  - screen
+  - experience
+  - information architecture
+  - hire signal
+  - case slate
+  - hero
+  - composition
+
+# Explicit writing/action language — outranks domain vocabulary when matched first.
+writing_action_terms:
+  - linkedin
+  - blog post
+  - write a post
+  - draft a post
+  - essay
+  - article about
+  - tweet
+  - caption

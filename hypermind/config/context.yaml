@@ -1,0 +1,148 @@
+# HyperMind context engine configuration
+# Paths are relative to the repository root unless absolute.
+
+context:
+  # Global ceilings (profiles may set lower values; never exceed these silently)
+  max_items: 8
+  max_chars: 8000
+  max_chars_per_item: 3500
+  sections:
+    max_chars_per_section: 1500
+  # Absolute override clamps for CLI
+  override_max_chars: 12000
+  override_max_items: 12
+
+context_profiles:
+  general:
+    max_items: 4
+    max_chars: 3000
+    decisions_max: 1
+    include_profile: false
+    include_agent_identity: false  # agent identity lives in system instruction
+    section_max_chars: 1200
+    preferred_source_types:
+      - current_state
+      - decision
+
+  design:
+    max_items: 5
+    max_chars: 4000
+    decisions_max: 2
+    include_profile: true
+    include_agent_identity: false
+    section_max_chars: 1500
+    preferred_source_types:
+      - current_state
+      - decision
+      - profile
+
+  writing:
+    max_items: 5
+    max_chars: 4000
+    decisions_max: 2
+    include_profile: true
+    include_agent_identity: false
+    section_max_chars: 1500
+    preferred_source_types:
+      - current_state
+      - decision
+      - profile
+
+  planning:
+    max_items: 6
+    max_chars: 4500
+    decisions_max: 2
+    include_profile: true
+    include_agent_identity: false
+    section_max_chars: 1500
+    preferred_source_types:
+      - current_state
+      - decision
+      - profile
+
+  research:
+    max_items: 5
+    max_chars: 4000
+    decisions_max: 1
+    include_profile: true
+    include_agent_identity: false
+    section_max_chars: 1500
+    preferred_source_types:
+      - current_state
+      - decision
+      - profile
+
+  coding:
+    max_items: 4
+    max_chars: 3000
+    decisions_max: 1
+    include_profile: false
+    include_agent_identity: false
+    section_max_chars: 1200
+    preferred_source_types:
+      - current_state
+      - decision
+      - markdown
+
+  memory:
+    max_items: 4
+    max_chars: 3000
+    decisions_max: 2
+    include_profile: true
+    include_agent_identity: false
+    section_max_chars: 1200
+    preferred_source_types:
+      - decision
+      - profile
+      - current_state
+
+  knowledge:
+    max_items: 4
+    max_chars: 3500
+    decisions_max: 2
+    include_profile: true
+    include_agent_identity: false
+    section_max_chars: 1400
+    preferred_source_types:
+      - decision
+      - current_state
+      - profile
+
+  communication:
+    max_items: 4
+    max_chars: 3000
+    decisions_max: 1
+    include_profile: true
+    include_agent_identity: false
+    section_max_chars: 1200
+    preferred_source_types:
+      - profile
+      - current_state
+      - decision
+
+  system:
+    max_items: 4
+    max_chars: 3000
+    decisions_max: 1
+    include_profile: false
+    include_agent_identity: false
+    section_max_chars: 1200
+    preferred_source_types:
+      - markdown
+      - current_state
+
+roots:
+  # Documented live vault (may be absent). Override with HYPERMIND_VAULT.
+  obsidian_vault: "C:\\Obsidian vaults\\Hypermind vault"
+  profile: hypermind/config/profile.md
+  decision_log: portfolio-os/governance/Decision_Log.md
+
+privacy:
+  deny_path_segments:
+    - Health
+    - Dating
+    - "Personal Growth"
+    - personal_growth
+    - dating
+    - health
+  profile_default: false

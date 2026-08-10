@@ -1,0 +1,56 @@
+# HyperMind model provider configuration
+# Override with env: OLLAMA_HOST, HYPERMIND_OLLAMA_MODEL, HYPERMIND_OLLAMA_AVAILABLE
+# Do not auto-download models — only use what is installed.
+
+prefer_local: true
+
+providers:
+  ollama:
+    enabled: true
+    base_url: http://127.0.0.1:11434
+    # null = auto-pick among installed text-eligible models (latency-aware)
+    model: null
+    # Fail-fast defaults (was 180). Override per run with --timeout.
+    timeout_seconds: 45
+    connect_timeout_seconds: 5
+    probe_timeout_seconds: 3
+    first_token_timeout_seconds: 25
+    stream: false
+    keep_alive: "10m"
+
+# Pattern-based defaults for unlisted installed tags (no downloads).
+# First matching rule wins. Explicit `models:` entries override these.
+model_class_rules:
+  - id: vision
+    match_prefixes: ["llava", "bakllava", "moondream"]
+    model_class: vision
+    latency_tier: vision
+    text_eligible: false
+    supports_vision: true
+  - id: local_fast
+    match_substrings: [":1b", ":1.5b", ":2b", ":3b", "tinyllama", "phi-2", "phi3:mini", "gemma2:2b"]
+    model_class: local_fast
+    latency_tier: fast
+    text_eligible: true
+  - id: local
+    match_prefixes: ["llama3", "llama2", "qwen", "mistral", "gemma", "phi"]
+    model_class: local
+    latency_tier: standard
+    text_eligible: true
+
+# Per-model metadata (context caps + routing hints for installed models)
+models:
+  llama3:latest:
+    max_context_chars: 3500
+    model_class: local
+    latency_tier: standard
+    text_eligible: true
+    supports_vision: false
+    # Optional stricter generate timeout for this tag
+    # timeout_seconds: 60
+  llava:latest:
+    max_context_chars: 3000
+    model_class: vision
+    latency_tier: vision
+    text_eligible: false
+    supports_vision: true
