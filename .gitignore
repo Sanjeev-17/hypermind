@@ -1,0 +1,21 @@
+# OS / editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.log
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+*.pem
+credentials.json
+
+# Dependencies / build
+node_modules/
+dist/
+.cache/
+
+# Local scratch / extracts
+work-cms-extract.json
+*.tmp

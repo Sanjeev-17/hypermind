@@ -1,0 +1,30 @@
+---
+description: Portfolio OS v1.0 — route via producer; memory-index read sets; freeze OS while building the portfolio.
+globs:
+alwaysApply: true
+---
+
+# Portfolio OS v1.0
+
+Official reference: `portfolio-os/Portfolio_OS_v1.0.md` (v1.0.5)  
+Workflow: `portfolio-os/PLAYBOOK.md`  
+Memory: `portfolio-os/memory-index.md`  
+Writing: `portfolio-os/WRITING_STANDARD.md` (required for all text)  
+Release: `portfolio-os/release/RELEASE_GATE.md` — levels L0–L3; no artefact complete without READY TO SHIP  
+Knowledge: Paper = temporary · Obsidian = permanent (`portfolio-os/knowledge/KNOWLEDGE_PIPELINE.md`)
+
+## Default
+
+1. Start with **portfolio-producer** unless a skill is named.
+2. Producer reads **memory-index** first and emits `For this task, read only: …`
+3. Prefer ⭐ Gold prompts from `prompts/INDEX.md` (never Experimental in production).
+4. One deliverable per thread; fewest skills; no full-repo context dumps.
+5. Log important decisions/assumptions/experiments under `portfolio-os/governance/`.
+6. Do not expand the OS without Decision Log + version bump. **Build the portfolio next.**
+
+## Priorities
+
+**P0:** portfolio-producer · portfolio-architect · story-strategist · creative-director  
+**P1:** design-intelligence-lab · visual-director · motion-director · interaction-designer · systems-designer · editorial-director  
+**P2:** framer-builder  
+**P3:** accessibility-lead · performance-lead · quality-auditor · hiring-manager-simulator · prompt-librarian
