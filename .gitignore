@@ -19,3 +19,6 @@ dist/
 # Local scratch / extracts
 work-cms-extract.json
 *.tmp
+
+# Local discovery adapter; canonical skill lives in /skills.
+.cursor/skills/hypermind-taste/
