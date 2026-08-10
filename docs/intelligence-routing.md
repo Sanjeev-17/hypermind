@@ -66,6 +66,8 @@ Execution supports **routing** plus **one bounded local generation** via Ollama 
 
 Intents: `planning` · `research` · `coding` · `design` · `writing` · `memory` · `knowledge` · `communication` · `system` · `general`
 
+Memory candidate proposals (Phase 6A): `python hypermind.py memory propose --json` — see `docs/memory-candidate-engine.md`. Does **not** persist memory.
+
 High-confidence regex rules first. Compact `reason_code` (e.g. `repo_operation`). No chain-of-thought storage.
 
 ---

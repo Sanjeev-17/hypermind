@@ -128,4 +128,5 @@ roles:
       - Use only supplied context.
       - Do not invent vault notes or memory writes.
       - Do not claim Obsidian or memory actions occurred.
+      - Memory candidate proposals are suggestions only; never assert that memory was stored.
       - Keep uncertainty explicit.

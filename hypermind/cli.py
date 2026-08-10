@@ -10,6 +10,7 @@ from hypermind.agents import AgentRegistry, select_agent
 from hypermind.context import ContextBuilder
 from hypermind.executor import HyperMindExecutor
 from hypermind.intent.router import IntentRouter
+from hypermind.memory import MemoryCandidateEngine, MemoryProposeRequest
 from hypermind.models.adapters import default_providers
 from hypermind.pipeline import IntelligenceRouter
 from hypermind.request import HyperMindRequest
@@ -392,6 +393,78 @@ def cmd_models(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_memory_propose(args: argparse.Namespace) -> int:
+    """Machine contract: stdin JSON → stdout JSON only. No memory writes."""
+    raw = sys.stdin.read()
+    try:
+        payload = json.loads(raw) if raw.strip() else {}
+    except json.JSONDecodeError as exc:
+        err = {
+            "ok": False,
+            "error": {"code": "INVALID_INPUT", "message": f"Invalid JSON: {exc}"},
+        }
+        print(json.dumps(err), file=sys.stdout)
+        print("invalid stdin JSON", file=sys.stderr)
+        return 2
+
+    if not isinstance(payload, dict):
+        err = {
+            "ok": False,
+            "error": {"code": "INVALID_INPUT", "message": "Root must be a JSON object"},
+        }
+        print(json.dumps(err))
+        return 2
+
+    text = payload.get("text")
+    if not isinstance(text, str) or not text.strip():
+        err = {
+            "ok": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "Field 'text' is required and must be a non-empty string",
+            },
+        }
+        print(json.dumps(err))
+        return 2
+
+    source_refs = payload.get("source_refs") or ["input:user"]
+    if not isinstance(source_refs, list) or not all(
+        isinstance(x, str) and x.strip() for x in source_refs
+    ):
+        err = {
+            "ok": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "source_refs must be a list of non-empty strings",
+            },
+        }
+        print(json.dumps(err))
+        return 2
+
+    try:
+        req = MemoryProposeRequest(
+            text=text,
+            project=payload.get("project"),
+            source_refs=[str(x).strip() for x in source_refs],
+            max_candidates=int(payload.get("max_candidates", 5)),
+        )
+    except (TypeError, ValueError) as exc:
+        err = {
+            "ok": False,
+            "error": {"code": "INVALID_INPUT", "message": str(exc)[:300]},
+        }
+        print(json.dumps(err))
+        return 2
+
+    engine = MemoryCandidateEngine(allow_stub=bool(getattr(args, "allow_stub", False)))
+    result = engine.propose(req)
+    print(json.dumps(result.to_envelope()))
+    if not result.ok:
+        print(result.error.get("message", "propose failed") if result.error else "failed", file=sys.stderr)
+        return 1
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="hypermind",
@@ -509,6 +582,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Show deterministic score components and profile rules",
     )
     context.set_defaults(func=cmd_context)
+
+    memory = sub.add_parser("memory", help="Controlled memory candidate operations")
+    memory_sub = memory.add_subparsers(dest="memory_command", required=True)
+    propose = memory_sub.add_parser(
+        "propose",
+        help="Propose memory candidates from stdin JSON (no persistence)",
+    )
+    propose.add_argument(
+        "--json",
+        action="store_true",
+        default=True,
+        help="Emit JSON envelope on stdout (machine default)",
+    )
+    propose.add_argument(
+        "--allow-stub",
+        action="store_true",
+        help="Allow stub provider (tests / offline demos only)",
+    )
+    propose.set_defaults(func=cmd_memory_propose)
 
     return parser
 
