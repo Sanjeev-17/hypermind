@@ -65,19 +65,18 @@ def _should_include_profile(intent: str, agent: AgentRole, text: str) -> bool:
 
 
 def _parse_accepted_decisions(raw: str) -> list[dict[str, str]]:
+    """Backward-compatible ACTIVE-only dict view (tests / legacy callers)."""
+    from hypermind.decisions.parse import parse_decision_log
+    from hypermind.decisions.types import DecisionStatus
+
     entries: list[dict[str, str]] = []
-    parts = re.split(r"(?m)^###\s+(D-\d+)\s+[—\-]\s+(.+)$", raw)
-    i = 1
-    while i + 2 < len(parts):
-        did, title, body = parts[i], parts[i + 1], parts[i + 2]
-        i += 3
-        if "Accepted" not in body:
-            if not re.search(r"\|\s*Status\s*\|\s*Accepted\s*\|", body, re.I):
-                continue
-        body = body.strip()
+    for rec in parse_decision_log(raw):
+        if rec.status != DecisionStatus.ACTIVE.value:
+            continue
+        body = str(rec.metadata.get("raw_excerpt") or rec.retrieval_blob())
         if len(body) > 1800:
             body = body[:1780].rstrip() + "\n…[truncated]"
-        entries.append({"id": did, "title": title.strip(), "body": body})
+        entries.append({"id": rec.id, "title": rec.title, "body": body})
     return entries
 
 
@@ -127,72 +126,166 @@ class ProfileSource(ContextSource):
 
 
 class DecisionSource(ContextSource):
+    """
+    Retrieve formal decisions with ACTIVE-first priority.
+
+    Default: ACTIVE only (authoritative).
+    History mode: may include SUPERSEDED for comparison queries.
+    """
+
     name = "decision"
 
     def __init__(self, config: ContextEngineConfig) -> None:
         self.config = config
 
     def can_handle(self, query: ContextQuery) -> bool:
+        from hypermind.decisions.resolve import is_historical_query
+
         if query.project_key == "portfolio":
             return True
         if query.intent in {"planning", "design", "knowledge", "research", "writing"}:
             return True
         text = query.request.raw_input.lower()
+        if is_historical_query(text):
+            return True
         return any(k in text for k in ("decision", "frozen", "accepted", "portfolio os"))
 
     def retrieve(self, query: ContextQuery) -> list[ContextItem]:
+        from hypermind.decisions.conflict import analyze_against_active
+        from hypermind.decisions.resolve import DecisionResolver, is_historical_query
+        from hypermind.decisions.types import DecisionStatus
+
         path = self.config.roots.decision_log
         if not path.is_file() or path_denied(
             path, self.config.privacy, self.config.roots.repo
         ):
             return []
-        try:
-            raw = path.read_text(encoding="utf-8")
-        except OSError:
+
+        resolver = DecisionResolver.from_path(path)
+        rel = _rel(path, self.config.roots.repo)
+        history = bool(query.metadata.get("history_mode")) or is_historical_query(
+            query.request.raw_input
+        )
+        query.metadata["history_mode"] = history
+
+        if history:
+            records = resolver.get_inspectable(include_superseded=True)
+        else:
+            # Decision Log is shared governance — do not drop ACTIVE by project key
+            records = resolver.get_active_decisions()
+
+        if not records:
             return []
 
         rq: RetrievalQuery | None = query.metadata.get("retrieval_query")
-        entries = _parse_accepted_decisions(raw)
-        rel = _rel(path, self.config.roots.repo)
-        if not entries:
-            return []
-
-        scored: list[tuple[float, dict, dict]] = []
-        for entry in entries:
+        scored: list[tuple[float, object, dict, bool]] = []
+        for rec in records:
+            entry = {
+                "id": rec.id,
+                "title": rec.title,
+                "body": rec.retrieval_blob(),
+            }
             if rq is not None:
                 breakdown = score_decision_entry(entry, rq)
                 score = breakdown.total
-                components = breakdown.components
+                components = dict(breakdown.components)
             else:
                 score = 10.0
                 components = {}
-            if score < _DECISION_SCORE_FLOOR:
-                continue
-            scored.append((score, entry, components))
 
-        scored.sort(key=lambda t: (-t[0], t[1]["id"]))
+            is_active = rec.status == DecisionStatus.ACTIVE.value
+            # Priority: explicit ACTIVE ref > relevant ACTIVE > (history) SUPERSEDED
+            if is_active:
+                components["active_decision"] = 12.0
+                score += 12.0
+            else:
+                components["superseded_historical"] = -8.0
+                score -= 8.0
+                if not history:
+                    continue
+                # History mode: keep superseded discoverable
+                components["history_mode_floor"] = 20.0
+                score += 20.0
+                raw_q = (rq.raw_query if rq else query.request.raw_input).lower()
+                if rec.id.lower() in raw_q or (
+                    rec.superseded_by and rec.superseded_by.lower() in raw_q
+                ):
+                    components["history_explicit_link"] = 40.0
+                    score += 40.0
+
+            if score < _DECISION_SCORE_FLOOR and not (
+                rq and rec.id.lower() in (rq.raw_query or "").lower()
+            ):
+                continue
+            scored.append((score, rec, components, is_active))
+
+        scored.sort(key=lambda t: (-t[0], t[1].id))  # type: ignore[attr-defined]
         cap = int(query.metadata.get("decisions_max", 2))
+        if history:
+            # Ensure room for SUPERSEDED alongside ACTIVE
+            cap = max(cap, 3)
+            superseded = [t for t in scored if not t[3]]
+            active_scored = [t for t in scored if t[3]]
+            merged = active_scored[: max(1, cap - 1)] + superseded[:1]
+            if len(merged) < cap:
+                rest = [t for t in scored if t not in merged]
+                merged.extend(rest[: cap - len(merged)])
+            scored = merged
+            # Consume full merged list below
+            cap = len(scored)
+
         items: list[ContextItem] = []
-        for score, entry, components in scored[: max(0, cap)]:
+        for score, rec, components, is_active in scored[: max(0, cap)]:
+            body = str(rec.metadata.get("raw_excerpt") or rec.retrieval_blob())
+            if len(body) > 1800:
+                body = body[:1780].rstrip() + "\n…[truncated]"
+            # ACTIVE: top decision priority; SUPERSEDED: demoted unless history mode
+            if is_active:
+                priority = KIND_PRIORITY[ContextKind.DECISION]
+            elif history:
+                # Still below ACTIVE (20) but above typical REFERENCE (50)
+                priority = KIND_PRIORITY[ContextKind.DECISION] + 5
+            else:
+                priority = KIND_PRIORITY[ContextKind.DECISION] + 25
             items.append(
                 ContextItem(
-                    id=_item_id("decision", entry["id"]),
+                    id=_item_id("decision", rec.id),
                     source_type="decision",
-                    source_ref=f"{rel}#{entry['id']}",
-                    title=f"{entry['id']}: {entry['title']}",
-                    content=entry["body"],
+                    source_ref=f"{rel}#{rec.id}",
+                    title=f"{rec.id}: {rec.title}",
+                    content=body,
                     relevance=min(1.0, score / 100.0),
-                    priority=KIND_PRIORITY[ContextKind.DECISION],
+                    priority=priority,
                     kind=ContextKind.DECISION,
                     metadata={
-                        "decision_id": entry["id"],
-                        "status": "Accepted",
+                        "decision_id": rec.id,
+                        "status": rec.status,
+                        "log_status": rec.metadata.get("log_status"),
+                        "frozen": rec.frozen,
+                        "historical": not is_active,
                         "score": score,
                         "score_components": components,
                         "path": rel,
+                        "scope": rec.scope,
+                        "project": rec.project,
                     },
                 )
             )
+
+        # Surface conflict signal when the request contradicts ACTIVE decisions
+        active_only = resolver.get_active_decisions()
+        hit = analyze_against_active(
+            query.request.raw_input,
+            active_only,
+            project=query.project_key,
+        )
+        if hit.decision_conflict:
+            query.metadata["decision_conflict_signal"] = {
+                "decision_conflict": True,
+                "decision_refs": list(hit.related_ids),
+                "reason_code": hit.reason_code,
+            }
+
         return items
 
 
@@ -591,6 +684,15 @@ class ContextResolver:
             profile_source=active_profile.source,
             coverage=coverage,
         )
+        # Attach decision conflict signal when DecisionSource detected one
+        signal = query.metadata.get("decision_conflict_signal")
+        if isinstance(signal, dict) and signal.get("decision_conflict"):
+            pack.signals = {
+                "decision_conflict": True,
+                "decision_refs": list(signal.get("decision_refs") or []),
+                "reason_code": signal.get("reason_code")
+                or "conflicts_with_active_decision",
+            }
         return pack
 
 

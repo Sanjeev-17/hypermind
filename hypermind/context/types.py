@@ -65,6 +65,8 @@ class ContextPack:
     context_budget_items: int = 0
     context_utilization: float = 0.0
     profile_source: str | None = None
+    # Machine-readable signals (e.g. decision_conflict) — never blocks the user
+    signals: dict[str, Any] = field(default_factory=dict)
 
     # Backward-compatible alias used by older call sites
     @property

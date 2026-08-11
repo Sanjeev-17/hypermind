@@ -10,6 +10,10 @@ from hypermind.agents import AgentRegistry, select_agent
 from hypermind.context import ContextBuilder
 from hypermind.executor import HyperMindExecutor
 from hypermind.intent.router import IntentRouter
+from hypermind.decisions import (
+    DecisionAnalyzeEngine,
+    DecisionAnalyzeRequest,
+)
 from hypermind.memory import MemoryCandidateEngine, MemoryProposeRequest
 from hypermind.models.adapters import default_providers
 from hypermind.pipeline import IntelligenceRouter
@@ -465,6 +469,88 @@ def cmd_memory_propose(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_decision_analyze(args: argparse.Namespace) -> int:
+    """Machine contract: stdin JSON → stdout JSON only. No Decision Log writes."""
+    raw = sys.stdin.read()
+    try:
+        payload = json.loads(raw) if raw.strip() else {}
+    except json.JSONDecodeError as exc:
+        err = {
+            "ok": False,
+            "error": {"code": "INVALID_INPUT", "message": f"Invalid JSON: {exc}"},
+        }
+        print(json.dumps(err), file=sys.stdout)
+        print("invalid stdin JSON", file=sys.stderr)
+        return 2
+
+    if not isinstance(payload, dict):
+        err = {
+            "ok": False,
+            "error": {"code": "INVALID_INPUT", "message": "Root must be a JSON object"},
+        }
+        print(json.dumps(err))
+        return 2
+
+    statement = payload.get("statement")
+    candidate = payload.get("candidate")
+    if (not isinstance(statement, str) or not statement.strip()) and not (
+        isinstance(candidate, dict) and str(candidate.get("statement") or "").strip()
+    ):
+        err = {
+            "ok": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "Field 'statement' or candidate.statement is required",
+            },
+        }
+        print(json.dumps(err))
+        return 2
+
+    source_refs = payload.get("source_refs") or ["input:user"]
+    if not isinstance(source_refs, list) or not all(
+        isinstance(x, str) and x.strip() for x in source_refs
+    ):
+        err = {
+            "ok": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "source_refs must be a list of non-empty strings",
+            },
+        }
+        print(json.dumps(err))
+        return 2
+
+    try:
+        req = DecisionAnalyzeRequest(
+            statement=str(statement or "").strip()
+            or str(candidate.get("statement")).strip(),  # type: ignore[union-attr]
+            project=payload.get("project"),
+            scope=str(payload.get("scope") or "project"),
+            source_refs=[str(x).strip() for x in source_refs],
+            title=payload.get("title"),
+            candidate=candidate if isinstance(candidate, dict) else None,
+            allow_model_assist=bool(payload.get("allow_model_assist", True)),
+        )
+    except (TypeError, ValueError) as exc:
+        err = {
+            "ok": False,
+            "error": {"code": "INVALID_INPUT", "message": str(exc)[:300]},
+        }
+        print(json.dumps(err))
+        return 2
+
+    engine = DecisionAnalyzeEngine(allow_stub=bool(getattr(args, "allow_stub", False)))
+    result = engine.analyze(req)
+    print(json.dumps(result.to_envelope()))
+    if not result.ok:
+        print(
+            result.error.get("message", "analyze failed") if result.error else "failed",
+            file=sys.stderr,
+        )
+        return 1
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="hypermind",
@@ -601,6 +687,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Allow stub provider (tests / offline demos only)",
     )
     propose.set_defaults(func=cmd_memory_propose)
+
+    decision = sub.add_parser("decision", help="Formal decision semantics (analyze only)")
+    decision_sub = decision.add_subparsers(dest="decision_command", required=True)
+    analyze = decision_sub.add_parser(
+        "analyze",
+        help="Analyze decision statement vs ACTIVE Decision Log (no persistence)",
+    )
+    analyze.add_argument(
+        "--json",
+        action="store_true",
+        default=True,
+        help="Emit JSON envelope on stdout (machine default)",
+    )
+    analyze.add_argument(
+        "--allow-stub",
+        action="store_true",
+        help="Allow stub/offline path (tests / demos)",
+    )
+    analyze.set_defaults(func=cmd_decision_analyze)
 
     return parser
 
