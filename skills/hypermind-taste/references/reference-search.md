@@ -23,6 +23,30 @@ domain + visual mechanism + intended product context
 - "ornamental border systems editorial design"
 - "ceramic tile patina pattern photography"
 
+## Rams & Norman queries
+
+- "Dieter Rams Braun product design less but better"
+- "Vitsœ 606 shelving system modular restraint"
+- "honest product design no dark patterns"
+- "Don Norman design of everyday things signifiers feedback"
+- "gulf of execution gulf of evaluation UI examples"
+- "natural mapping controls interface design"
+- "design for error recoverable forms UX"
+
+Capture mechanisms: restraint, honesty, self-explanation, feedback timing, mapping — not superficial “minimalist aesthetic.”
+
+## Framer portfolio queries
+
+When the task is to refine or extend the live portfolio chrome (not restyle it toward the baseline board), search for:
+
+- "dark mode product designer portfolio Inter typography"
+- "neon lime accent dark portfolio CTA"
+- "device mockup case study card saturated background"
+- "agency portfolio selected work grid dark theme"
+- "minimal dark about page experience timeline"
+
+Capture what to keep (contrast, mockup stages, lime CTA) vs what to reject (generic template FAQ spam, unverified vanity stats as hero).
+
 ## Reference Families
 
 Use these families to avoid overfitting to the initial archival and Indian vernacular board. Keep the original baseline available, but search broadly when the project asks for it.

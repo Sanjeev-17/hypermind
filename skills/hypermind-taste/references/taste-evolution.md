@@ -60,6 +60,39 @@ Evidence: Sanjeev explicitly requested observation, pattern, and principle level
 Implication: Record new feedback as Observation by default; promote only when reinforced, confirmed, or sufficiently evidenced.
 Reference: Conversation request on 2026-08-10.
 
+Date: 2026-08-10
+Type: Observation
+Confidence: high
+Scope: project
+Context: Framer project "Sanjeev's Portfolio" inspected via Framer agent (styles + page screenshots for `/`, `/work`, `/about`, `/experiments`).
+Liked: High-contrast dark field; large Inter headlines with tight tracking; single lime accent for CTA/status; saturated case-stage cards with device mockups; clear Work/About/Experiments IA; metric-led case one-liners; sparse Experiments page for AI/prototype work.
+Rejected: Treating this agency-template chrome as identical to the archival/vernacular baseline; importing textile/poster density into the current Framer pages without a restyle brief; leftover template modules (FAQ/Awards/Services) as taste authorities.
+Evidence: Color styles Black/White/Accent(`rgb(130,255,28)`)/grays; fonts `[Inter]`; screenshots of home/work/about/experiments; CMS Work cases P-001/P-005/P-006.
+Implication: Document a separate Framer ship-surface contract; keep baseline taste for Hypermind/experimental work; when editing Framer, match dark+lime+Inter first.
+Reference: `references/framer-portfolio.md`; Framer project `6EnOOaab7bLwBHTmdNGH`
+
+Date: 2026-08-10
+Type: Pattern
+Confidence: medium
+Scope: context
+Context: Portfolio ship surface vs personal taste board.
+Liked: Explicit dual-track: baseline board remains aspirational; Framer site is the public product chrome hiring managers see.
+Rejected: Collapsing both into one global aesthetic rule.
+Evidence: Live site visual system diverges sharply from the initial taste PDF (dark Inter/lime vs archival/ornamental).
+Implication: Agents must pick the active surface before designing. Portfolio OS interview-conversion goals apply to Framer edits.
+Reference: Conversation request to update taste skill from Framer portfolio (2026-08-10).
+
+Date: 2026-08-10
+Type: Principle
+Confidence: high
+Scope: global
+Context: Sanjeev stated inspiration from Dieter Rams and Don Norman; requested they be inspected and converted into skills, and included in taste files.
+Liked: Rams' useful/honest/unobtrusive/long-lasting/thorough/as-little-as-possible judgment; Norman's affordances/signifiers, mapping, feedback, constraints, conceptual models, gulfs, design for error.
+Rejected: Treating Rams as mere gray minimal styling; treating Norman as "add tooltips"; collapsing either into the archival taste palette.
+Evidence: Explicit user request; public Rams Ten Principles (Vitsœ / Rams Foundation); Norman's Design of Everyday Things concepts as interaction psychology.
+Implication: Ship dedicated `skills/dieter-rams` and `skills/don-norman`; wire into hypermind-taste as quality/interaction overlays beside surface dialect.
+Reference: `skills/dieter-rams/SKILL.md`, `skills/don-norman/SKILL.md`, `references/influences-rams-norman.md`
+
 ## Open Experiments
 
 - Translate dense textile and tile systems into subtle app navigation, borders, and state indicators.
@@ -67,3 +100,6 @@ Reference: Conversation request on 2026-08-10.
 - Explore archival collage as a UI metaphor for memory, knowledge, and personal operating systems.
 - Test how much ornament an operational interface can carry before scan speed drops.
 - Combine non-archival reference families with the original baseline without diluting the tactile, culturally specific, and editorial signal.
+- Optionally restyle Framer toward the baseline board in a deliberate pass — do not mix dialects mid-page.
+- Tighten Framer case cards around decision narratives; demote vanity-stat heroization when numbers are unverified.
+- Apply Rams honesty + Norman feedback audits to Framer CTAs, empty experiment sections, and metric lines.

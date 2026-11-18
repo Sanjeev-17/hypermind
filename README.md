@@ -46,7 +46,7 @@ portfolio-os/          Portfolio OS (playbook, governance, strategy, release, kn
   release/             Release Gate L0–L3
 .cursor/skills/        Specialist agent skills (producer, architect, HM simulator, …)
 .cursor/rules/         Always-on Portfolio OS rules
-skills/                Shared HyperMind skills (e.g. taste) — not Cursor runtime
+skills/                Shared HyperMind skills (taste, dieter-rams, don-norman) — not Cursor runtime
 portfolio/             Product Brief
 prompts/               Prompt library architecture + templates
 obsidian/              Stub → live vault is external Hypermind Obsidian vault
